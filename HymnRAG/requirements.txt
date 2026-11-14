@@ -1,0 +1,7 @@
+Flask
+gunicorn
+requests
+beautifulsoup4
+numpy
+sentence-transformers
+torch
