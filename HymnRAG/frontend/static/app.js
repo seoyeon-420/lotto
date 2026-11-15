@@ -174,9 +174,19 @@ async function submit() {
   try{searchConfig=collectConfigs();}catch(e){statusEl.textContent=e.message;statusEl.className='status error';return;}
   submitBtn.disabled=true;submitBtn.textContent='검색 중...';
   statusEl.className='status'; statusEl.textContent='매일미사를 읽고 성가를 찾아보고 있어요 . . .(최대 5분 소요)';
-  try{
-    const resp=await fetch('/api/recommend',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date,search_config:searchConfig,book:selectedBook})});
-    const data=await resp.json();if(!resp.ok)throw new Error(data.error||'검색에 실패했습니다.');
+  try{const resp = await fetch('/api/recommend', {method: 'POST',headers: {'Content-Type': 'application/json'},body: JSON.stringify({date,search_config: searchConfig,book: selectedBook})});
+  const raw = await resp.text();
+  let data;
+  try {data = JSON.parse(raw);
+      } catch (e) {
+  throw new Error(
+    `서버 응답 오류 (HTTP ${resp.status}). Render 로그를 확인해 주세요.`
+  );
+}
+
+if (!resp.ok) {
+  throw new Error(data.error || '검색에 실패했습니다.');
+}
     current=data;activePosition='입당';renderResults();resultsEl.classList.remove('hidden');
     statusEl.textContent='추천 검색이 완료되었습니다.';
     resultsEl.scrollIntoView({behavior:'smooth',block:'start'});
