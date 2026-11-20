@@ -158,14 +158,33 @@ function renderResults() {
   songResults.append(el('div','used-sections',`검색 참조 항목: ${used || '정보 없음'}`));
   const songs=group.songs||[];
   if(!songs.length){songResults.append(el('p','result-note','해당 조건에서 표시할 검색 후보가 없습니다.'));return;}
-  songs.forEach((s,i)=>{
-    const card=el('article','song');
-    card.append(el('h3','',`${i+1}. ${s.title||s.hymn_id||'성가'}`));
-    card.append(el('div','meta',`성가 식별자: ${s.hymn_id||'-'} · 분류: ${s.category||'-'}`));
-    const score=Number(s.final_score ?? s.similarity);
-    if(Number.isFinite(score))card.append(el('div','meta score',`검색 점수: ${score.toFixed(4)}`));
-    songResults.append(card);
-  });
+  
+songs.forEach((s) => {
+  const card = el('article', 'song');
+
+  // hymn_id 예시: childrenDB:125
+  // 성가책 식별자를 제외하고 성가 번호만 추출
+  const hymnNumber = String(s.hymn_id || '')
+    .split(':')
+    .pop();
+
+  // 성가 번호 + 제목
+  card.append(
+    el('h3', '', `${hymnNumber}. ${s.title || '성가'}`)
+  );
+
+  // 카테고리만 표시
+  const category = Array.isArray(s.category)
+    ? s.category.join(', ')
+    : (s.category || '-');
+
+  card.append(
+    el('div', 'meta', `카테고리: ${category}`)
+  );
+
+  songResults.append(card);
+});
+
 }
 async function submit() {
   const date=dateInput.value.trim();
@@ -174,19 +193,9 @@ async function submit() {
   try{searchConfig=collectConfigs();}catch(e){statusEl.textContent=e.message;statusEl.className='status error';return;}
   submitBtn.disabled=true;submitBtn.textContent='검색 중...';
   statusEl.className='status'; statusEl.textContent='매일미사를 읽고 성가를 찾아보고 있어요 . . .(최대 5분 소요)';
-  try{const resp = await fetch('/api/recommend', {method: 'POST',headers: {'Content-Type': 'application/json'},body: JSON.stringify({date,search_config: searchConfig,book: selectedBook})});
-  const raw = await resp.text();
-  let data;
-  try {data = JSON.parse(raw);
-      } catch (e) {
-  throw new Error(
-    `서버 응답 오류 (HTTP ${resp.status}). Render 로그를 확인해 주세요.`
-  );
-}
-
-if (!resp.ok) {
-  throw new Error(data.error || '검색에 실패했습니다.');
-}
+  try{
+    const resp=await fetch('/api/recommend',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({date,search_config:searchConfig,book:selectedBook})});
+    const data=await resp.json();if(!resp.ok)throw new Error(data.error||'검색에 실패했습니다.');
     current=data;activePosition='입당';renderResults();resultsEl.classList.remove('hidden');
     statusEl.textContent='추천 검색이 완료되었습니다.';
     resultsEl.scrollIntoView({behavior:'smooth',block:'start'});
