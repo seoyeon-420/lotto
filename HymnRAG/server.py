@@ -155,12 +155,12 @@ def get_categories(book_id):
             "error": "성가책을 찾을 수 없습니다."
         }), 404
 
-    categories = sorted({
+    categories = list(dict.fromkeys(
         hymn["category"].strip()
         for hymn in hymns
         if isinstance(hymn.get("category"), str)
         and hymn["category"].strip()
-    })
+    ))
 
     return jsonify({
         "book": book_id,
