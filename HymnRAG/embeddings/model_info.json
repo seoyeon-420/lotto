@@ -1,0 +1,6 @@
+{
+  "model": "Xenova/multilingual-e5-small",
+  "dimension": 384,
+  "document_prefix": "passage: ",
+  "query_prefix": "query: "
+}
