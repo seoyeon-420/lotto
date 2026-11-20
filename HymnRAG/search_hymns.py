@@ -90,7 +90,7 @@ model_info = json.loads(
     )
 )
 
-MODEL_NAME = "intfloat/multilingual-e5-small"
+MODEL_NAME = "Xenova/multilingual-e5-small"
 
 if model_info.get("model") != MODEL_NAME:
     raise ValueError(
@@ -105,8 +105,9 @@ TextEmbedding.add_custom_model(
     normalization=True,
     sources=ModelSource(hf=MODEL_NAME),
     dim=384,
-    model_file="onnx/model.onnx",
+    model_file="onnx/model_quantized.onnx",
 )
+
 
 # ONNX 기반 경량 모델 실행
 model = TextEmbedding(
