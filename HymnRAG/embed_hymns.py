@@ -1,3 +1,4 @@
+
 import json
 import numpy as np
 from pathlib import Path
@@ -7,17 +8,17 @@ from fastembed.common.model_description import PoolingType, ModelSource
 
 
 # 사용할 경량 임베딩 모델
-MODEL_NAME = "intfloat/multilingual-e5-small"
+MODEL_NAME = "Xenova/multilingual-e5-small"
 
-# FastEmbed 사용자 정의 모델 등록
 TextEmbedding.add_custom_model(
     model=MODEL_NAME,
     pooling=PoolingType.MEAN,
     normalization=True,
     sources=ModelSource(hf=MODEL_NAME),
     dim=384,
-    model_file="onnx/model.onnx",
+    model_file="onnx/model_quantized.onnx",
 )
+
 
 # 모델 불러오기
 model = TextEmbedding(
